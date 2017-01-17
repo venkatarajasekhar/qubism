@@ -4,9 +4,24 @@
 // 080725-121211
 
 #include "cmatrix.h"
+#include <iostream>     // std::cout
+#include <algorithm>    // std::copy
+#include <vector>       // std::vector
+#include <cstring>
+#include <fstream>
+#include <exception>
 
+using namespace std;
 #ifndef CMATRIX3
 #define CMATRIX3
+
+#ifdef EXCEPTION
+struct Exception : public exception {
+   const char * what () const throw () {
+      return "C++ Exception";
+   }
+};
+#endif EXCEPTION
 
 ///////////////////////////////////////////////////////////////////////////
 //  Real Implementations
@@ -18,19 +33,24 @@
 
 CVector::CVector(): N(0), D(NULL) {} 
 
-CVector::CVector(long n)
+void CVector::CVector(long n)
 {
+      try{
       Start(n);
       Zero();
+      }catch(...){
+	//Required the Error Logic       
+      }
 }
 
-CVector::CVector(const CVector &V)
+void CVector::CVector(const CVector &V)
 {
      Start(V.N);
-     if (N) memcpy(D,V.D,(N+1)*sizeof(cmplx));
+     if (N)
+	     memcpy(D,V.D,(N+1)*sizeof(cmplx));
 }
 
-CVector::CVector(const Vector &V)
+void CVector::CVector(const Vector &V)
 {
      Start(V.N);
      if (N) 
@@ -38,13 +58,16 @@ CVector::CVector(const Vector &V)
 	       D[i]=V(i);
 }
 
-CVector::CVector(cmplx *data, long n)
+void CVector::CVector(cmplx *data, long n)
 {
      Start(n);
      memcpy(D,data,(n+1)*sizeof(cmplx));
 }
 
-CVector::~CVector() { Destroy(); }
+void
+CVector::~CVector() { 
+Destroy(); 
+}
 
 // Here we're sure that the CVector exists beforehand,
 // So it is previously destroyed
@@ -124,7 +147,8 @@ void CVector::Destroy()
 
 void CVector::Zero()
 {
-     if (N) memset(D,0,(N+1)*sizeof(cmplx));
+     if (N) 
+	     memset(D,0,(N+1)*sizeof(cmplx));
 }
 
 bool CVector::Is_Zero(double tolerance)
@@ -543,8 +567,17 @@ void CVector::Imag()
 
 CVector Imag(const CVector &V)
 {
+     #ifdef EXCEPTION
+     try{
      CVector R(V);
      R.Imag();
+     }catch(Exception& e) {
+      std::cout << "Exception caught" << std::endl;
+      std::cout << e.what() << std::endl;
+   } catch(std::exception& e) {
+      //Other errors
+   }
+	#endif EXCEPTION
      return R;
 }
 
@@ -556,9 +589,18 @@ void CVector::Abs()
 
 CVector Abs(const CVector &V)
 {
+     #endif EXCEPTION
+	try{
      CVector R(V);
      R.Abs();
-     return R;
+     }catch(Exception& e) {
+      std::cout << "Exception caught" << std::endl;
+      std::cout << e.what() << std::endl;
+   } catch(std::exception& e) {
+      //Other errors
+   }
+    #endif EXCEPTION
+	return R;
 }
 
 void CVector::Conj()
@@ -617,31 +659,77 @@ int CVector::Save_Binary(FILE *fich) const
 
 int CVector::Save_Binary(const char *name) const
 {
+     #ifdef EXCEPTION
+	try{
      FILE *fich=fopen(name,"wb");
+     }catch(Exception& e) {
+      std::cout << "Exception caught" << std::endl;
+      std::cout << e.what() << std::endl;
+   } catch(std::exception& e) {
+      //Other errors
+   }
+	#endif EXCEPTION
      if (!fich) return 0;
      int status=Save_Binary(fich);
+	#ifdef EXCEPTION
+     try{	
      fclose(fich);
+     }catch(Exception& e) {
+      std::cout << "Exception caught" << std::endl;
+      std::cout << e.what() << std::endl;
+   } catch(std::exception& e) {
+      //Other errors
+   }
+	#endif EXCEPTION
      return status;
 }
 
 int CVector::Load_Binary(FILE *fich)
 {
      int ausgang;
+     try{
      ausgang=fwrite(&N,sizeof(long),1,fich);
+     }catch(Exception& e) {
+      std::cout << "Exception caught" << std::endl;
+      std::cout << e.what() << std::endl;
+   } catch(std::exception& e) {
+      //Other errors
+   }
      if (ausgang!=1) return 0;
      if (!N) { D=(cmplx*)NULL; return 1; }
      Create(N);
+     try{	
      ausgang=fwrite(D,sizeof(cmplx),N+1,fich);
+     }catch(Exception& e) {
+      std::cout << "Exception caught" << std::endl;
+      std::cout << e.what() << std::endl;
+   } catch(std::exception& e) {
+      //Other errors
+   }
      if (ausgang!=N+1) return 0;
      return 1;
 }
 
 int CVector::Load_Binary(const char *name)
 {
+     try{
      FILE *fich=fopen(name,"rb");
+     }catch(Exception& e) {
+      std::cout << "Exception caught" << std::endl;
+      std::cout << e.what() << std::endl;
+   } catch(std::exception& e) {
+      //Other errors
+   }
      if (!fich) return 0;
      int status=Load_Binary(fich);
+     try{	
      fclose(fich);
+     }catch(Exception& e) {
+      std::cout << "Exception caught" << std::endl;
+      std::cout << e.what() << std::endl;
+   } catch(std::exception& e) {
+      //Other errors
+   }
      return status;
 }
 
